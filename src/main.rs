@@ -3,6 +3,7 @@ use ratatui::Frame;
 use ratatui_image::{StatefulImage, picker::Picker, protocol::StatefulProtocol};
 use std::{
     env,
+    ops::{Index, IndexMut},
     path::Path,
     time::{Duration, Instant},
 };
@@ -11,12 +12,26 @@ use anyhow::{Context as _, Result, anyhow};
 use ffmpeg::{format, frame};
 use image::{DynamicImage, ImageBuffer, RgbImage, RgbaImage};
 
+struct VideoFrames {
+    frames: Vec<Option<StatefulProtocol>>,
+    decoder: ffmpeg::decoder::Video,
+}
+
+impl VideoFrames {
+    pub fn get(&mut self, i: usize) -> &mut StatefulProtocol {
+        if let Some(Some(frame)) = self.frames.get_mut(i) {
+            return frame;
+        }
+        todo!()
+    }
+}
+
 /// Returns a list of frames for this video
 fn get_frames_of_video_at_path(video_path: &Path) -> Result<Vec<DynamicImage>> {
-    ffmpeg::init().map_err(|e| anyhow!("Failed to initialize FFmpeg: {}", e))?;
+    ffmpeg::init().map_err(|e| anyhow!("Failed to initialize FFmpeg: {e}"))?;
 
     let mut input =
-        format::input(video_path).map_err(|e| anyhow!("Failed to open input file: {}", e))?;
+        format::input(video_path).map_err(|e| anyhow!("Failed to open input file: {e}"))?;
 
     let stream = input
         .streams()
@@ -26,11 +41,11 @@ fn get_frames_of_video_at_path(video_path: &Path) -> Result<Vec<DynamicImage>> {
     let stream_index = stream.index();
 
     let context_decoder = ffmpeg::codec::context::Context::from_parameters(stream.parameters())
-        .map_err(|e| anyhow!("Failed to create decoder context: {}", e))?;
+        .map_err(|e| anyhow!("Failed to create decoder context: {e}"))?;
     let mut decoder = context_decoder
         .decoder()
         .video()
-        .map_err(|e| anyhow!("Failed to create video decoder: {}", e))?;
+        .map_err(|e| anyhow!("Failed to create video decoder: {e}"))?;
 
     let mut decoded_frame = frame::Video::empty();
     let mut rgb_frame = frame::Video::empty();
@@ -47,7 +62,7 @@ fn get_frames_of_video_at_path(video_path: &Path) -> Result<Vec<DynamicImage>> {
         height,
         ffmpeg::software::scaling::Flags::BILINEAR,
     )
-    .map_err(|e| anyhow!("Failed to create scaler: {}", e))?;
+    .map_err(|e| anyhow!("Failed to create scaler: {e}"))?;
 
     let mut frames = vec![];
 
@@ -55,12 +70,12 @@ fn get_frames_of_video_at_path(video_path: &Path) -> Result<Vec<DynamicImage>> {
         if stream.index() == stream_index {
             decoder
                 .send_packet(&packet)
-                .map_err(|e| anyhow!("Failed to send packet to decoder: {}", e))?;
+                .map_err(|e| anyhow!("Failed to send packet to decoder: {e}"))?;
 
             while decoder.receive_frame(&mut decoded_frame).is_ok() {
                 scaler
                     .run(&decoded_frame, &mut rgb_frame)
-                    .map_err(|e| anyhow!("Failed to convert frame to RGB: {}", e))?;
+                    .map_err(|e| anyhow!("Failed to convert frame to RGB: {e}"))?;
                 let width = rgb_frame.width();
                 let height = rgb_frame.height();
 
