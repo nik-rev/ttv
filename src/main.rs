@@ -118,7 +118,7 @@ const FRAME_DURATION: Duration = Duration::from_millis(1000 / FPS as u64);
 const TICK_RATE: Duration = Duration::from_millis(16);
 
 fn main() -> Result<()> {
-    color_eyre::install().unwrap();
+    let _ = color_eyre::install();
 
     let video = env::args()
         .nth(1)
@@ -148,7 +148,8 @@ fn main() -> Result<()> {
     }
 
     for mut img in app.frames {
-        img.last_encoding_result().unwrap()?;
+        img.last_encoding_result()
+            .context("Failed to get the last encoding result")??;
     }
     Ok(())
 }
