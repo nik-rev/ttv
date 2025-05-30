@@ -6,7 +6,6 @@ Status: It Works™, but it's very flickery and inefficient. The implementation 
 
 ## Showcase
 
-
 https://github.com/user-attachments/assets/d1e80f9c-1efd-4ee8-91fd-9a5341646511
 
 In the demo I'm using [`Rio`](https://github.com/raphamorim/rio) which has by far the best performance out of all other terminals.
@@ -22,3 +21,7 @@ To download the demo video:
 ```
 yt-dlp -f mp4 https://www.youtube.com/watch?v=WO2b03Zdu4Q -o demo.mp4
 ```
+
+## Future
+
+If we can figure out how to get rid of the flicker, I will develop this project into a proper media player. Maybe switch to [GStreamer](https://gstreamer.freedesktop.org/) instead of ffmpeg. Contributions and ideas are very welcome!
