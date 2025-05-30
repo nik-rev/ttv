@@ -9,7 +9,7 @@ use std::{
 
 use anyhow::{Context as _, Result, anyhow};
 use ffmpeg::{format, frame};
-use image::{DynamicImage, RgbImage};
+use image::{DynamicImage, ImageBuffer, RgbImage, RgbaImage};
 
 /// Returns a list of frames for this video
 fn get_frames_of_video_at_path(video_path: &Path) -> Result<Vec<DynamicImage>> {
@@ -61,18 +61,40 @@ fn get_frames_of_video_at_path(video_path: &Path) -> Result<Vec<DynamicImage>> {
                 scaler
                     .run(&decoded_frame, &mut rgb_frame)
                     .map_err(|e| anyhow!("Failed to convert frame to RGB: {}", e))?;
+                let width = rgb_frame.width();
+                let height = rgb_frame.height();
 
-                let mut buffer: RgbImage =
-                    image::ImageBuffer::new(rgb_frame.width(), rgb_frame.height());
+                // pixels of the frame, including stride
+                let pixels = rgb_frame.data(0);
 
-                for (x, y, pixel) in buffer.enumerate_pixels_mut() {
-                    let data = rgb_frame.data(0);
-                    let stride = rgb_frame.stride(0);
-                    let offset = y as usize * stride + x as usize * 3;
-                    *pixel = image::Rgb([data[offset], data[offset + 1], data[offset + 2]]);
+                // bytes from one row to the next one
+                let stride = rgb_frame.stride(0);
+
+                // 3 bytes per pixel
+                let byte_count_per_row = width as usize * 3;
+
+                let mut data = Vec::with_capacity(height as usize * byte_count_per_row);
+
+                if stride == byte_count_per_row {
+                    // If there's no padding, we can copy the whole data directly (or clone).
+                    // This is an optimization, but often stride will be different.
+                    data.extend_from_slice(pixels);
+                } else {
+                    // There is padding, so copy row by row, omitting the padding.
+                    for y in 0..height as usize {
+                        let row_start_in_ffmpeg_data = y * stride;
+                        let row_end_in_ffmpeg_data = row_start_in_ffmpeg_data + byte_count_per_row;
+                        data.extend_from_slice(
+                            &pixels[row_start_in_ffmpeg_data..row_end_in_ffmpeg_data],
+                        );
+                    }
                 }
 
-                frames.push(image::DynamicImage::ImageRgb8(buffer));
+                // Now, tightly_packed_data contains the image data without padding.
+                let buf: RgbImage = RgbImage::from_raw(width, height, data)
+                    .context("Failed to construct RgbImage from a frame after processing stride")?;
+
+                frames.push(image::DynamicImage::ImageRgb8(buf));
             }
         }
     }
