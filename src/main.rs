@@ -3,28 +3,13 @@ use ratatui::Frame;
 use ratatui_image::{StatefulImage, picker::Picker, protocol::StatefulProtocol};
 use std::{
     env,
-    ops::{Index, IndexMut},
     path::Path,
     time::{Duration, Instant},
 };
 
 use anyhow::{Context as _, Result, anyhow};
 use ffmpeg::{format, frame};
-use image::{DynamicImage, ImageBuffer, RgbImage, RgbaImage};
-
-struct VideoFrames {
-    frames: Vec<Option<StatefulProtocol>>,
-    decoder: ffmpeg::decoder::Video,
-}
-
-impl VideoFrames {
-    pub fn get(&mut self, i: usize) -> &mut StatefulProtocol {
-        if let Some(Some(frame)) = self.frames.get_mut(i) {
-            return frame;
-        }
-        todo!()
-    }
-}
+use image::{DynamicImage, RgbImage};
 
 /// Returns a list of frames for this video
 fn get_frames_of_video_at_path(video_path: &Path) -> Result<Vec<DynamicImage>> {
