@@ -1,4 +1,4 @@
-# tty
+# ttv
 
 This project is an attempt to create a media player that runs **in the terminal**!
 
