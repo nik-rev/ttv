@@ -64,37 +64,29 @@ fn get_frames_of_video_at_path(video_path: &Path) -> Result<Vec<DynamicImage>> {
                 let width = rgb_frame.width();
                 let height = rgb_frame.height();
 
-                // pixels of the frame, including stride
-                let pixels = rgb_frame.data(0);
+                let pixels_with_padding = rgb_frame.data(0);
 
                 // bytes from one row to the next one
-                let stride = rgb_frame.stride(0);
+                // pixel_stride =  3 (RGB) + pixel_padding
+                let pixel_stride = rgb_frame.stride(0);
 
                 // 3 bytes per pixel
-                let byte_count_per_row = width as usize * 3;
+                let bytes_per_row = width as usize * 3;
 
-                let mut data = Vec::with_capacity(height as usize * byte_count_per_row);
+                let mut pixels = Vec::with_capacity(height as usize * bytes_per_row);
 
-                if stride == byte_count_per_row {
-                    // If there's no padding, we can copy the whole data directly (or clone).
-                    // This is an optimization, but often stride will be different.
-                    data.extend_from_slice(pixels);
-                } else {
-                    // There is padding, so copy row by row, omitting the padding.
-                    for y in 0..height as usize {
-                        let row_start_in_ffmpeg_data = y * stride;
-                        let row_end_in_ffmpeg_data = row_start_in_ffmpeg_data + byte_count_per_row;
-                        data.extend_from_slice(
-                            &pixels[row_start_in_ffmpeg_data..row_end_in_ffmpeg_data],
-                        );
-                    }
+                for y in 0..height as usize {
+                    let pixel_start = y * pixel_stride;
+                    // Omit padding at the end of each row
+                    let pixel_end = pixel_start + bytes_per_row;
+                    pixels.extend_from_slice(&pixels_with_padding[pixel_start..pixel_end]);
                 }
 
-                // Now, tightly_packed_data contains the image data without padding.
-                let buf: RgbImage = RgbImage::from_raw(width, height, data)
-                    .context("Failed to construct RgbImage from a frame after processing stride")?;
-
-                frames.push(image::DynamicImage::ImageRgb8(buf));
+                frames.push(image::DynamicImage::ImageRgb8(
+                    RgbImage::from_raw(width, height, pixels).context(
+                        "Failed to construct RgbImage from a frame after processing stride",
+                    )?,
+                ));
             }
         }
     }
