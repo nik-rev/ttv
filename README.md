@@ -6,4 +6,8 @@ Status: It Works™, but it's very flickery and inefficient. The implementation 
 
 ## Showcase
 
-![showcase](./showcase.mkv)
+https://github.com/user-attachments/assets/1a661e79-7f74-455e-ad60-c9549e5aa4cf
+
+## Building
+
+Follow the instructions on building [ffmpeg_next](https://github.com/zmwangx/rust-ffmpeg/wiki/Notes-on-building), as this crate depends on it. Then just do `cargo run --release -- video.mp4`.
