@@ -1,5 +1,4 @@
 use crossterm::event::{self, Event};
-use ratatui::Frame;
 use ratatui_image::{StatefulImage, picker::Picker, protocol::StatefulProtocol};
 use std::{
     env,
@@ -129,7 +128,13 @@ fn main() -> Result<()> {
             }
         }
 
-        terminal.draw(|f| ui(f, &mut app, start.elapsed()))?;
+        terminal.draw(|f| {
+            let frame_index = (start.elapsed().as_millis() / FRAME_DURATION.as_millis()) as usize
+                % app.frames.len();
+
+            let image = StatefulImage::default();
+            f.render_stateful_widget(image, f.area(), &mut app.frames[frame_index]);
+        })?;
     }
 
     for mut img in app.frames {
@@ -137,12 +142,4 @@ fn main() -> Result<()> {
             .context("Failed to get the last encoding result")??;
     }
     Ok(())
-}
-
-fn ui(f: &mut Frame<'_>, app: &mut App, elapsed: Duration) {
-    let frame_index =
-        (elapsed.as_millis() / FRAME_DURATION.as_millis()) as usize % app.frames.len();
-
-    let image = StatefulImage::default();
-    f.render_stateful_widget(image, f.area(), &mut app.frames[frame_index]);
 }
