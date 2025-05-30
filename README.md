@@ -8,7 +8,7 @@ Status: It Works™, but it's very flickery and inefficient. The implementation 
 
 https://github.com/user-attachments/assets/a23f7873-5551-4dc8-a20c-bb5f323fb8c7
 
-It's flickery as terminals need to re-draw everything for each frame. It'll be nice to get rid of the flicker, I think to accomplish this instead of doing `frame A -> clear screen -> frame B` we can directly go from `frame A -> frame B`. Likely to accomplish this we will need changes from the side of the terminal emulator.
+It's flickery as terminals need to re-draw everything for each frame. It'll be nice to get rid of the flicker, I think to accomplish this instead of doing `frame A -> clear screen -> frame B` we can directly go from `frame A -> frame B`. Which might require changes from the side of the terminal emulator.
 
 ## Building
 
