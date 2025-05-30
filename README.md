@@ -6,7 +6,7 @@ Status: It Works™, but it's very flickery and inefficient. The implementation 
 
 ## Showcase
 
-https://github.com/user-attachments/assets/1a661e79-7f74-455e-ad60-c9549e5aa4cf
+https://github.com/user-attachments/assets/a23f7873-5551-4dc8-a20c-bb5f323fb8c7
 
 ## Building
 
