@@ -86,7 +86,7 @@ struct App {
 
 const FPS: u32 = 30;
 const FRAME_DURATION: Duration = Duration::from_millis(1000 / FPS as u64);
-const TICK_RATE: Duration = Duration::from_millis(1);
+const TICK_RATE: Duration = Duration::from_millis(33);
 
 fn main() -> Result<()> {
     color_eyre::install().unwrap();
