@@ -97,9 +97,8 @@ struct App {
     frames: Vec<StatefulProtocol>,
 }
 
-const FPS: u32 = 30;
-const FRAME_DURATION: Duration = Duration::from_millis(1000 / FPS as u64);
-const TICK_RATE: Duration = Duration::from_millis(16);
+const FPS: u32 = 400;
+const TICK_RATE: Duration = Duration::from_millis(1000 / FPS as u64);
 
 fn main() -> Result<()> {
     let _ = color_eyre::install();
@@ -129,8 +128,8 @@ fn main() -> Result<()> {
         }
 
         terminal.draw(|f| {
-            let frame_index = (start.elapsed().as_millis() / FRAME_DURATION.as_millis()) as usize
-                % app.frames.len();
+            let frame_index =
+                (start.elapsed().as_millis() / TICK_RATE.as_millis()) as usize % app.frames.len();
 
             let image = StatefulImage::default();
             f.render_stateful_widget(image, f.area(), &mut app.frames[frame_index]);
