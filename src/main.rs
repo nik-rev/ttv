@@ -1,7 +1,11 @@
-use crossterm::event::{self, Event};
+use crossterm::{
+    event::{self, Event},
+    execute,
+    terminal::{BeginSynchronizedUpdate, EndSynchronizedUpdate},
+};
 use ratatui_image::{StatefulImage, picker::Picker, protocol::StatefulProtocol};
 use std::{
-    env,
+    env, io,
     path::Path,
     time::{Duration, Instant},
 };
@@ -97,7 +101,7 @@ struct App {
     frames: Vec<StatefulProtocol>,
 }
 
-const FPS: u32 = 400;
+const FPS: u32 = 30;
 const TICK_RATE: Duration = Duration::from_millis(1000 / FPS as u64);
 
 fn main() -> Result<()> {
@@ -127,6 +131,7 @@ fn main() -> Result<()> {
             }
         }
 
+        execute!(io::stdout(), BeginSynchronizedUpdate)?;
         terminal.draw(|f| {
             let frame_index =
                 (start.elapsed().as_millis() / TICK_RATE.as_millis()) as usize % app.frames.len();
@@ -134,6 +139,7 @@ fn main() -> Result<()> {
             let image = StatefulImage::default();
             f.render_stateful_widget(image, f.area(), &mut app.frames[frame_index]);
         })?;
+        execute!(io::stdout(), EndSynchronizedUpdate)?;
     }
 
     for mut img in app.frames {
