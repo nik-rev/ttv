@@ -1,6 +1,6 @@
 # ttv
 
-This project is a demo of a video playing in the terminal!
+This project is a proof-of-concept demo of a video playing in the terminal!
 
 ## Showcase
 
@@ -19,7 +19,3 @@ To download the demo video:
 ```
 yt-dlp -f mp4 https://www.youtube.com/watch?v=WO2b03Zdu4Q -o demo.mp4
 ```
-
-## Future
-
-Switch to [GStreamer](https://gstreamer.freedesktop.org/) instead of ffmpeg in order to create a terminal media player??!?!?! :O
